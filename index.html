@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+  这是 demo 的导航首页。
+  你只需要用浏览器打开这个 index.html，就能看到所有练习项目的入口。
+  建议：先打开页面玩一玩，再回来对照代码看每一行是怎么实现的。
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <!-- viewport 让页面在手机上也能正常缩放显示 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>练习 Demo 合集</title>
+  <style>
+    /* ===== 全局样式 ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    h1 { font-size: 26px; margin-bottom: 8px; color: #333; }
+    .subtitle { color: #888; margin-bottom: 28px; font-size: 14px; }
+    /* 每一个 demo 用一张“卡片”来展示 */
+    .card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
+    }
+    .card .emoji { font-size: 28px; }
+    .card h2 { font-size: 18px; margin: 6px 0 4px; }
+    .card p { color: #999; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 前端练习 Demo 合集</h1>
+    <p class="subtitle">点击下面任意一个项目开始练习</p>
+
+    <!-- 每个 <a> 是一个链接，点击后会跳转到对应的 demo 页面 -->
+    <a class="card" href="guess-number.html">
+      <div class="emoji">🎯</div>
+      <h2>猜数字游戏</h2>
+      <p>练习：变量、条件判断、事件监听、随机数</p>
+    </a>
+
+    <a class="card" href="todo.html">
+      <div class="emoji">✅</div>
+      <h2>待办清单</h2>
+      <p>练习：数组操作、DOM 增删、本地存储</p>
+    </a>
+
+    <a class="card" href="calculator.html">
+      <div class="emoji">🧮</div>
+      <h2>简易计算器</h2>
+      <p>练习：字符串处理、按钮事件、计算逻辑</p>
+    </a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+  待办清单 (To-Do List)
+  功能：添加任务、勾选完成、删除任务，并把数据保存在浏览器里（刷新不丢失）。
+
+  学习重点：
+    1. 用数组 (Array) 保存一组数据
+    2. 增 / 删 / 改 数组里的元素
+    3. 根据数据“渲染”页面（用代码动态生成 HTML）
+    4. localStorage：把数据存到浏览器，下次打开还在
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>待办清单</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .box {
+      background: #fff; border-radius: 16px; padding: 32px;
+      max-width: 440px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    h1 { font-size: 24px; margin-bottom: 20px; text-align: center; }
+    .input-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .input-row input {
+      flex: 1; padding: 12px; font-size: 15px;
+      border: 2px solid #ddd; border-radius: 10px;
+    }
+    .input-row input:focus { outline: none; border-color: #ff758c; }
+    .input-row button {
+      padding: 12px 18px; font-size: 15px; cursor: pointer;
+      background: #ff758c; color: #fff; border: none; border-radius: 10px;
+    }
+    ul { list-style: none; }
+    li {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; border-bottom: 1px solid #f0f0f0;
+    }
+    li span { flex: 1; font-size: 15px; }
+    /* 已完成的任务：加删除线 + 变灰 */
+    li.done span { text-decoration: line-through; color: #bbb; }
+    li .del {
+      cursor: pointer; color: #ff4757; background: none; border: none;
+      font-size: 18px;
+    }
+    .empty { text-align: center; color: #ccc; padding: 20px 0; }
+    a { display: block; text-align: center; margin-top: 20px; color: #ff758c; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>✅ 我的待办清单</h1>
+
+    <div class="input-row">
+      <input type="text" id="taskInput" placeholder="要做点什么？" />
+      <button id="addBtn">添加</button>
+    </div>
+
+    <!-- 任务列表会用 JS 动态填充到这个 <ul> 里 -->
+    <ul id="taskList"></ul>
+
+    <a href="index.html">← 返回首页</a>
+  </div>
+
+  <script>
+    // ===== 1. 数据：所有任务存在这个数组里 =====
+    // 每个任务是一个对象 { text: "任务内容", done: false }
+    // 启动时先尝试从 localStorage 读取上次保存的数据
+    let tasks = JSON.parse(localStorage.getItem("my-tasks")) || [];
+
+    const input = document.getElementById("taskInput");
+    const addBtn = document.getElementById("addBtn");
+    const list = document.getElementById("taskList");
+
+    // ===== 2. 保存数据到浏览器 =====
+    function save() {
+      // localStorage 只能存字符串，所以用 JSON.stringify 把数组转成文字
+      localStorage.setItem("my-tasks", JSON.stringify(tasks));
+    }
+
+    // ===== 3. 渲染：根据 tasks 数组重新画出整个列表 =====
+    function render() {
+      list.innerHTML = ""; // 先清空，避免重复
+
+      if (tasks.length === 0) {
+        list.innerHTML = '<p class="empty">还没有任务，添加一个吧～</p>';
+        return;
+      }
+
+      // 遍历数组，每个任务生成一个 <li>
+      tasks.forEach(function (task, index) {
+        const li = document.createElement("li");
+        if (task.done) li.classList.add("done"); // 已完成的加样式
+
+        li.innerHTML = `
+          <input type="checkbox" ${task.done ? "checked" : ""} />
+          <span>${task.text}</span>
+          <button class="del">🗑️</button>
+        `;
+
+        // 勾选框：切换完成状态
+        li.querySelector("input").addEventListener("change", function () {
+          tasks[index].done = !tasks[index].done;
+          save();
+          render();
+        });
+
+        // 删除按钮：从数组里移除这一项
+        li.querySelector(".del").addEventListener("click", function () {
+          tasks.splice(index, 1); // splice(起始位置, 删除几个)
+          save();
+          render();
+        });
+
+        list.appendChild(li);
+      });
+    }
+
+    // ===== 4. 添加任务 =====
+    function addTask() {
+      const text = input.value.trim(); // trim() 去掉首尾空格
+      if (!text) return; // 空内容不添加
+
+      tasks.push({ text: text, done: false }); // 把新任务加到数组末尾
+      input.value = "";
+      save();
+      render();
+    }
+
+    // ===== 5. 绑定事件 + 首次渲染 =====
+    addBtn.addEventListener("click", addTask);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") addTask();
+    });
+
+    render(); // 页面打开时先画一次
+  </script>
+</body>
+</html>

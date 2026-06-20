@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+  猜数字游戏
+  规则：程序随机生成一个 1~100 的整数，你来猜，每次会提示“大了/小了”，
+        直到猜中为止，并统计你用了几次。
+
+  学习重点：
+    1. 用 Math.random() 生成随机数
+    2. 用 if / else 做条件判断
+    3. 监听按钮点击事件 (addEventListener)
+    4. 修改页面文字 (textContent)
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>猜数字游戏</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .box {
+      background: #fff; border-radius: 16px; padding: 36px;
+      max-width: 420px; width: 100%; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 { font-size: 24px; margin-bottom: 6px; }
+    .hint { color: #888; font-size: 14px; margin-bottom: 24px; }
+    input {
+      width: 100%; padding: 12px; font-size: 18px; text-align: center;
+      border: 2px solid #ddd; border-radius: 10px; margin-bottom: 14px;
+    }
+    input:focus { outline: none; border-color: #43cea2; }
+    button {
+      width: 100%; padding: 12px; font-size: 16px; cursor: pointer;
+      background: #185a9d; color: #fff; border: none; border-radius: 10px;
+    }
+    button:hover { background: #134673; }
+    /* 显示提示信息的区域，颜色会根据结果变化 */
+    #message { margin-top: 20px; font-size: 18px; font-weight: bold; min-height: 26px; }
+    #count { color: #999; font-size: 13px; margin-top: 8px; }
+    a { display: inline-block; margin-top: 20px; color: #185a9d; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>🎯 猜数字游戏</h1>
+    <p class="hint">我想了一个 1 到 100 之间的数字，猜猜看？</p>
+
+    <!-- type="number" 让输入框只接受数字 -->
+    <input type="number" id="guessInput" placeholder="输入你猜的数字" min="1" max="100" />
+    <button id="guessBtn">确定</button>
+
+    <div id="message"></div>
+    <div id="count">已猜 0 次</div>
+
+    <a href="index.html">← 返回首页</a>
+  </div>
+
+  <script>
+    // ===== 1. 准备数据 =====
+    // Math.random() 返回 0~1 之间的小数；下面这行把它变成 1~100 的整数
+    let answer = Math.floor(Math.random() * 100) + 1;
+    let tries = 0; // 记录猜了几次
+
+    // ===== 2. 获取页面上的元素，方便后面操作 =====
+    const input = document.getElementById("guessInput");
+    const button = document.getElementById("guessBtn");
+    const message = document.getElementById("message");
+    const countEl = document.getElementById("count");
+
+    // ===== 3. 核心逻辑：每次点击按钮就检查一次 =====
+    function checkGuess() {
+      // 把输入框里的文字转成数字
+      const guess = Number(input.value);
+
+      // 先做输入校验：必须是 1~100 的有效数字
+      if (!guess || guess < 1 || guess > 100) {
+        message.textContent = "请输入 1 到 100 之间的数字";
+        message.style.color = "#e67e22";
+        return; // return 表示直接结束本次函数，不再往下走
+      }
+
+      tries++; // 次数 +1
+      countEl.textContent = "已猜 " + tries + " 次";
+
+      // 比较大小，给出对应提示
+      if (guess === answer) {
+        message.textContent = "🎉 猜对了！答案就是 " + answer;
+        message.style.color = "#27ae60";
+        button.textContent = "再玩一次";
+        button.onclick = resetGame; // 猜中后，按钮变成“重新开始”
+      } else if (guess > answer) {
+        message.textContent = "太大了，往小猜 ⬇️";
+        message.style.color = "#e74c3c";
+      } else {
+        message.textContent = "太小了，往大猜 ⬆️";
+        message.style.color = "#3498db";
+      }
+
+      input.value = ""; // 清空输入框，方便下一次输入
+      input.focus();    // 光标自动回到输入框
+    }
+
+    // ===== 4. 重新开始游戏 =====
+    function resetGame() {
+      answer = Math.floor(Math.random() * 100) + 1;
+      tries = 0;
+      message.textContent = "";
+      countEl.textContent = "已猜 0 次";
+      button.textContent = "确定";
+      button.onclick = checkGuess;
+      input.focus();
+    }
+
+    // ===== 5. 绑定事件 =====
+    button.addEventListener("click", checkGuess);
+    // 额外小技巧：在输入框按回车键也能提交
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") button.click();
+    });
+  </script>
+</body>
+</html>

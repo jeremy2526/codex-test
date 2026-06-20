@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<!--
+  简易计算器
+  功能：加减乘除、清除、退格，支持小数点。
+
+  学习重点：
+    1. 用一个变量 (current) 记录当前输入的算式
+    2. 给一组按钮统一绑定事件（事件委托的思路）
+    3. 用 data-* 属性给按钮做标记
+    4. 安全地计算结果（这里用简单方式演示）
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>简易计算器</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .calc {
+      background: #1e1e1e; border-radius: 18px; padding: 20px;
+      width: 320px; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    /* 显示屏 */
+    .screen {
+      background: #000; color: #fff; text-align: right;
+      font-size: 32px; padding: 20px 16px; border-radius: 12px;
+      margin-bottom: 16px; min-height: 72px;
+      word-break: break-all; /* 算式太长时换行 */
+    }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    button {
+      padding: 18px 0; font-size: 20px; cursor: pointer;
+      border: none; border-radius: 12px; background: #333; color: #fff;
+    }
+    button:hover { opacity: 0.85; }
+    .op { background: #ff9500; }      /* 运算符按钮 橙色 */
+    .fn { background: #a5a5a5; color: #000; } /* 功能键 灰色 */
+    .equal { background: #ff9500; }
+    .zero { grid-column: span 2; } /* 0 占两格宽 */
+    a { display: block; text-align: center; margin-top: 16px; color: #4ca1af; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="calc">
+    <!-- 显示屏：显示当前算式或结果 -->
+    <div class="screen" id="screen">0</div>
+
+    <div class="grid">
+      <!--
+        每个按钮用 data-* 属性标记它的“类型”和“值”：
+          data-type="num"   数字或小数点
+          data-type="op"    运算符 + - * /
+          data-type="clear" 全部清除
+          data-type="back"  退格
+          data-type="equal" 计算结果
+      -->
+      <button class="fn" data-type="clear">C</button>
+      <button class="fn" data-type="back">⌫</button>
+      <button class="op" data-type="op" data-val="/">÷</button>
+      <button class="op" data-type="op" data-val="*">×</button>
+
+      <button data-type="num" data-val="7">7</button>
+      <button data-type="num" data-val="8">8</button>
+      <button data-type="num" data-val="9">9</button>
+      <button class="op" data-type="op" data-val="-">−</button>
+
+      <button data-type="num" data-val="4">4</button>
+      <button data-type="num" data-val="5">5</button>
+      <button data-type="num" data-val="6">6</button>
+      <button class="op" data-type="op" data-val="+">+</button>
+
+      <button data-type="num" data-val="1">1</button>
+      <button data-type="num" data-val="2">2</button>
+      <button data-type="num" data-val="3">3</button>
+      <button class="equal" data-type="equal" style="grid-row: span 2;">=</button>
+
+      <button class="zero" data-type="num" data-val="0">0</button>
+      <button data-type="num" data-val=".">.</button>
+    </div>
+
+    <a href="index.html">← 返回首页</a>
+  </div>
+
+  <script>
+    // current 保存当前正在输入的算式字符串，例如 "12+3*4"
+    let current = "";
+    const screen = document.getElementById("screen");
+
+    // 把 current 显示到屏幕上；如果是空的就显示 0
+    function update() {
+      screen.textContent = current === "" ? "0" : current;
+    }
+
+    // 计算结果
+    function calculate() {
+      try {
+        // 注意：这里用 Function 来求值是为了教学演示，写法简单。
+        // 真实项目中处理用户输入要更严格地校验，避免安全风险。
+        const result = Function('"use strict"; return (' + current + ")")();
+        // 如果结果是小数，最多保留 6 位，去掉多余的 0
+        current = String(Math.round(result * 1e6) / 1e6);
+      } catch (e) {
+        current = ""; // 算式不合法时清空
+        screen.textContent = "出错了";
+        return;
+      }
+      update();
+    }
+
+    // ===== 给整个按钮区域绑定一个点击事件（事件委托） =====
+    // 不用给每个按钮单独绑定，点哪个按钮都会进到这里
+    document.querySelector(".grid").addEventListener("click", function (e) {
+      const btn = e.target;
+      const type = btn.dataset.type; // 读取 data-type
+      if (!type) return; // 点到空白处就忽略
+
+      if (type === "num") {
+        current += btn.dataset.val; // 数字直接拼接到算式后面
+        update();
+      } else if (type === "op") {
+        if (current === "") return; // 算式为空时不允许先输运算符
+        current += btn.dataset.val;
+        update();
+      } else if (type === "clear") {
+        current = "";
+        update();
+      } else if (type === "back") {
+        current = current.slice(0, -1); // 去掉最后一个字符
+        update();
+      } else if (type === "equal") {
+        if (current !== "") calculate();
+      }
+    });
+  </script>
+</body>
+</html>
